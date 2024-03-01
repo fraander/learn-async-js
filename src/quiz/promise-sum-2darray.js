@@ -1,47 +1,42 @@
-// sum of a row is function
-// return a promise
-// Promise.all
-
-function sumRow(row) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(row.sum());
-    } catch {
-      reject("BAD INPUT");
-    }
-  });
+async function sumRow(row) {
+  if (Array.isArray(row)) {
+    return row.reduce((partialSum, a) => {
+      if (isNaN(a)) {
+        throw Error("Not a number");
+      } else {
+        return partialSum + a;
+      }
+    }, 0);
+  } else {
+    throw Error("Not an array");
+  }
 }
 
-function sum2DArray(arr) {
-  return new Promise((resolve, reject) => {
-    console.log("Sum called ... ");
-    if (Array.isArray(arr)) {
-      setTimeout(async () => {
-        let sum = 0;
-        let promises = [];
-        for (let i = 0; i < arr.length; i++) {
-          promises.push(
-            sumRow(arr[i])
-              .then((r) => (sum += r))
-              .catch((e) => reject(e))
-          );
-        }
-        console.log("resolving ... ");
-        await Promise.all(promises);
-        resolve(sum);
-      }, 0);
-    } else {
-      console.log("rejecting ... ");
-      reject("BAD INPUT: Expected array as input");
+async function sum2DArray(arr) {
+  if (Array.isArray(arr)) {
+    let sum = 0;
+    for (let i = 0; i < arr.length; i++) {
+      sum += await sumRow(arr[i]);
     }
-    console.log("returning from sum");
-  }).then((r) => console.log(r));
+    return sum
+  } else {
+    throw Error("Not an array");
+  }
 }
 
-const array2D = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9],
-];
+async function main() {
+  const array2D = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+  ];
 
-console.log(sum2DArray(array2D));
+  try {
+    const res = await sum2DArray(array2D);
+    console.log(res);
+  } catch (e) {
+    console.log("Error");
+  }
+}
+
+main();
